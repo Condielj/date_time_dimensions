@@ -616,7 +616,7 @@ def holiday_name(k):
         return "Not Applicable"
 
 
-if __name__ == "__main__":
+def create_dataframe():
     columns = [
         "date_key",
         "full_date",
@@ -665,5 +665,11 @@ if __name__ == "__main__":
         data.append(calculate_columns(d))
         cur = cur + datetime.timedelta(days=1)
     table = pd.DataFrame(data=data, columns=columns)
+
+    return table
+
+
+if __name__ == "__main__":
+    table = create_dataframe()
     table.to_csv("dates.csv")
     print("Done")
