@@ -1,11 +1,12 @@
-import datetime
+from datetime import timedelta, date
 import calendar
 import isoweek
 import pandas as pd
 import holidays
 
-days_per_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-days_of_week = [
+# global variables
+DAYS_PER_MONTH = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+DAYS_OF_WEEK = [
     0,
     "Monday",
     "Tuesday",
@@ -15,7 +16,7 @@ days_of_week = [
     "Saturday",
     "Sunday",
 ]
-name_of_month = [
+NAME_OF_MONTH = [
     0,
     "January",
     "February",
@@ -30,7 +31,7 @@ name_of_month = [
     "November",
     "December",
 ]
-supported_holidays = [
+SUPPORTED_HOLIDAYS = [
     "Black Friday",
     "Thanksgiving",
     "Christmas Day",
@@ -86,17 +87,17 @@ def calculate_columns(date_key):
     )
 
 
-def date_to_key(date):
+def date_to_key(kdate):
     """
     Takes a datetime.date and returns the date_key format: int(YYYYMMDD)
     """
     month_zero = ""
     day_zero = ""
-    if date.month < 10:
+    if kdate.month < 10:
         month_zero = "0"
-    if date.day < 10:
+    if kdate.day < 10:
         day_zero = "0"
-    return int(f"{date.year}{month_zero}{date.month}{day_zero}{date.day}")
+    return int(f"{kdate.year}{month_zero}{kdate.month}{day_zero}{kdate.day}")
 
 
 def key_to_date(k):
@@ -104,7 +105,7 @@ def key_to_date(k):
     Takes a date_key and returns a datetime.date
     """
     y, m, d = ymd_int(k)
-    return datetime.date(y, m, d)
+    return date(y, m, d)
 
 
 def ymd_str(k):
@@ -164,9 +165,9 @@ def day_of_quarter(k):
         if month == 1:
             return day
         elif month == 2:
-            return day + days_per_month[1]
+            return day + DAYS_PER_MONTH[1]
         elif month == 3:
-            doq = day + days_per_month[1] + days_per_month[2]
+            doq = day + DAYS_PER_MONTH[1] + DAYS_PER_MONTH[2]
             if is_leap_year(k):
                 doq += 1
             return doq
@@ -174,23 +175,23 @@ def day_of_quarter(k):
         if month == 4:
             return day
         elif month == 5:
-            return day + days_per_month[4]
+            return day + DAYS_PER_MONTH[4]
         elif month == 6:
-            return day + days_per_month[4] + days_per_month[5]
+            return day + DAYS_PER_MONTH[4] + DAYS_PER_MONTH[5]
     elif q == 3:
         if month == 7:
             return day
         elif month == 8:
-            return day + days_per_month[7]
+            return day + DAYS_PER_MONTH[7]
         elif month == 9:
-            return day + days_per_month[7] + days_per_month[8]
+            return day + DAYS_PER_MONTH[7] + DAYS_PER_MONTH[8]
     elif q == 4:
         if month == 10:
             return day
         elif month == 11:
-            return day + days_per_month[10]
+            return day + DAYS_PER_MONTH[10]
         elif month == 12:
-            return day + days_per_month[10] + days_per_month[11]
+            return day + DAYS_PER_MONTH[10] + DAYS_PER_MONTH[11]
     else:
         raise Exception(f"Something went wrong in day_of_quarter({k})")
 
@@ -203,14 +204,14 @@ def day_of_year_half(k):
     doyh = 0
     if month < 7:
         for i in range(month):
-            doyh += days_per_month[i]
+            doyh += DAYS_PER_MONTH[i]
         if is_leap_year(k):
             doyh += 1
         return doyh + day
     else:
         for i in range(month):
             if i > 6:
-                doyh += days_per_month[i]
+                doyh += DAYS_PER_MONTH[i]
             return doyh + day
 
 
@@ -221,7 +222,7 @@ def day_of_year(k):
     _, month, day = ymd_int(k)
     doy = 0
     for i in range(month):
-        doy += days_per_month[i]
+        doy += DAYS_PER_MONTH[i]
     if month > 2 and is_leap_year(k):
         doy += 1
     return doy + day
@@ -254,7 +255,7 @@ def is_last_day_in_month(k):
         if is_leap_year(k):
             return day == 29
 
-    return day == days_per_month[month]
+    return day == DAYS_PER_MONTH[month]
 
 
 def is_weekend(k):
@@ -275,7 +276,7 @@ def weekday_name(k):
     """
     Weekday name | Datatype: str | Format: Sunday..Saturday (Wednesday)
     """
-    return days_of_week[day_of_week(k)]
+    return DAYS_OF_WEEK[day_of_week(k)]
 
 
 def weekday_abbrev(k):
@@ -304,16 +305,16 @@ def week_of_month(k):
     # find the mondays (week start)
     m1 = week_begin_date_key(first_day_of_month)
     m2 = week_begin_date_key(
-        date_to_key(key_to_date(first_day_of_month) + datetime.timedelta(days=7))
+        date_to_key(key_to_date(first_day_of_month) + timedelta(days=7))
     )
     m3 = week_begin_date_key(
-        date_to_key(key_to_date(first_day_of_month) + datetime.timedelta(days=14))
+        date_to_key(key_to_date(first_day_of_month) + timedelta(days=14))
     )
     m4 = week_begin_date_key(
-        date_to_key(key_to_date(first_day_of_month) + datetime.timedelta(days=21))
+        date_to_key(key_to_date(first_day_of_month) + timedelta(days=21))
     )
     m5 = week_begin_date_key(
-        date_to_key(key_to_date(first_day_of_month) + datetime.timedelta(days=28))
+        date_to_key(key_to_date(first_day_of_month) + timedelta(days=28))
     )
 
     cur = key_to_date(k)
@@ -366,7 +367,7 @@ def week_begin_date_key(k):
     if dow == 1:
         return k
     else:
-        wbd = key_to_date(k) - datetime.timedelta(days=(dow - 1))
+        wbd = key_to_date(k) - timedelta(days=(dow - 1))
         if wbd.month < 10:
             month_zero = "0"
         if wbd.day < 10:
@@ -387,7 +388,7 @@ def month_name(k):
     Month name | Datatype: str | Format: January..December (February)
     """
     m = month(k)
-    return name_of_month[m]
+    return NAME_OF_MONTH[m]
 
 
 def month_abbrev(k):
@@ -551,8 +552,8 @@ def is_peak_week(k):
     # check if black friday is within 7 days of d, if not, we know it is not peak week
     seven_range = []
     for i in range(7):
-        seven_range.append(date_to_key(cur - datetime.timedelta(days=i + 1)))
-        seven_range.append(date_to_key(cur + datetime.timedelta(days=i + 1)))
+        seven_range.append(date_to_key(cur - timedelta(days=i + 1)))
+        seven_range.append(date_to_key(cur + timedelta(days=i + 1)))
     which = ""
     found = False
     for i, w in enumerate(seven_range):
@@ -563,8 +564,8 @@ def is_peak_week(k):
         return False
 
     # if we're here, we have found Black Friday.  Determine peak week days from there.
-    begin = key_to_date(which) - datetime.timedelta(days=3)
-    end = key_to_date(which) + datetime.timedelta(days=3)
+    begin = key_to_date(which) - timedelta(days=3)
+    end = key_to_date(which) + timedelta(days=3)
     if found:
         if cur >= begin and cur <= end:
             return True
@@ -575,15 +576,15 @@ def is_holiday(k):
     cur = key_to_date(k)
     h = holidays.US()
     holiday = h.get(cur)
-    if holiday in supported_holidays:
+    if holiday in SUPPORTED_HOLIDAYS:
         return True
 
     # check if black friday (day after thanksgiving)
-    cur -= datetime.timedelta(days=1)
+    cur -= timedelta(days=1)
     if h.get(cur) == "Thanksgiving":
         return True
     # check if cyber monday (monday after thanksgiving)
-    cur -= datetime.timedelta(days=3)
+    cur -= timedelta(days=3)
     if h.get(cur) == "Thanksgiving":
         return True
 
@@ -596,16 +597,16 @@ def holiday_name(k):
         if not holiday:
             cur = key_to_date(k)
             # check if black friday (day after thanksgiving)
-            cur -= datetime.timedelta(days=1)
+            cur -= timedelta(days=1)
             if holiday_name(date_to_key(cur)) == "Thanksgiving":
                 return "Black Friday"
             # check if cyber monday (monday after thanksgiving)
-            cur -= datetime.timedelta(days=3)
+            cur -= timedelta(days=3)
             if holiday_name(date_to_key(cur)) == "Thanksgiving":
                 return "Cyber Monday"
             # check if Christmas Eve (day before Christmas)
             cur = key_to_date(k)
-            cur += datetime.timedelta(days=1)
+            cur += timedelta(days=1)
             if holiday_name(date_to_key(cur)) == "Christmas Day":
                 return "Christmas Eve"
 
@@ -663,7 +664,7 @@ def create_dataframe():
             break
         d = date_to_key(cur)
         data.append(calculate_columns(d))
-        cur = cur + datetime.timedelta(days=1)
+        cur = cur + timedelta(days=1)
     table = pd.DataFrame(data=data, columns=columns)
 
     return table
